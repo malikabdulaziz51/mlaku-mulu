@@ -6,11 +6,14 @@ import { TouristTypeormEntity } from '../entities/tourist.typeorm-entity';
 
 export class TouristTypeormRepository implements ITouristRepository {
   constructor(
-    @InjectRepository(Tourist)
+    @InjectRepository(TouristTypeormEntity)
     private readonly touristRepository: Repository<TouristTypeormEntity>,
   ) {}
   async findAll(): Promise<Tourist[]> {
-    const touristEntities = await this.touristRepository.find();
+    const touristEntities = await this.touristRepository
+      .createQueryBuilder('tourist')
+      .where('tourist.isDeleted = false')
+      .getMany();
     return touristEntities.map((touristEntity) =>
       this.toDomainEntity(touristEntity),
     );
@@ -35,9 +38,10 @@ export class TouristTypeormRepository implements ITouristRepository {
     }
     return this.toDomainEntity(tourist);
   }
-  async save(tourist: Tourist): Promise<void> {
+  async save(tourist: Tourist): Promise<Tourist> {
     const touristEntity = this.toTypeormEntity(tourist);
     await this.touristRepository.save(touristEntity);
+    return this.toDomainEntity(touristEntity);
   }
 
   async delete(id: number): Promise<void> {

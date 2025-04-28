@@ -13,31 +13,37 @@ export class UpdateTouristUseCase {
     private readonly touristRepository: ITouristRepository,
   ) {}
 
-  async execute(id: number, updateTouristDto: UpdateTouristDto): Promise<void> {
+  async execute(
+    id: number,
+    updateTouristDto: UpdateTouristDto,
+  ): Promise<Tourist> {
     const tourist = await this.touristRepository.findById(id);
 
     if (!tourist) {
       throw new Error('Tourist not found');
     }
 
-    if (
-      updateTouristDto.passportNumber &&
-      updateTouristDto.passportNumber !== tourist.getPassportNumber()
-    ) {
-      const existingTourist = await this.touristRepository.findByPassportNumber(
-        updateTouristDto.passportNumber,
-      );
+    const existingTourist = await this.touristRepository.findByPassportNumber(
+      updateTouristDto.passportNumber !== undefined
+        ? updateTouristDto.passportNumber
+        : tourist.getPassportNumber(),
+    );
 
-      if (existingTourist && existingTourist.getId() !== id) {
-        throw new BadRequestException(
-          'Tourist with this passport number already exists',
-        );
-      }
+    if (existingTourist && existingTourist.getId() !== id) {
+      throw new BadRequestException(
+        'Tourist with this passport number already exists',
+      );
     }
 
-    await this.touristRepository.save({
-      ...tourist,
-      ...updateTouristDto,
-    } as Tourist);
+    const updatedTourist = Tourist.create({
+      id: tourist.getId(),
+      name: updateTouristDto.name || tourist.getName(),
+      passportNumber:
+        updateTouristDto.passportNumber || tourist.getPassportNumber(),
+      phone: updateTouristDto.phone || tourist.getPhone(),
+      nationality: updateTouristDto.nationality || tourist.getNationality(),
+    });
+
+    return await this.touristRepository.save(updatedTourist);
   }
 }

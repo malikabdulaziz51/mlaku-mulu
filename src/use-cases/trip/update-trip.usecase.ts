@@ -20,32 +20,37 @@ export class UpdateTripUseCase {
     private readonly touristRepository: ITouristRepository,
   ) {}
 
-  async execute(id: number, updateTripDto: UpdateTripDto): Promise<void> {
+  async execute(id: number, updateTripDto: UpdateTripDto): Promise<Trip> {
     const trip = await this.tripRepository.findById(id);
-
+    let tourist = null;
     if (!trip) {
       throw new NotFoundException(`Trip with ID ${id} not found`);
     }
-
-    // If updating tourist, verify tourist exists
-    if (
-      updateTripDto.touristId &&
-      updateTripDto.touristId !== trip.getTourist().getId()
-    ) {
-      const tourist = await this.touristRepository.findById(
-        updateTripDto.touristId,
+    tourist = await this.touristRepository.findById(
+      updateTripDto.touristId
+        ? updateTripDto.touristId
+        : trip.getTourist().getId(),
+    );
+    if (!tourist) {
+      throw new NotFoundException(
+        `Tourist with ID ${updateTripDto.touristId} not found`,
       );
-
-      if (!tourist) {
-        throw new NotFoundException(
-          `Tourist with ID ${updateTripDto.touristId} not found`,
-        );
-      }
     }
 
-    await this.tripRepository.save({
-      ...trip,
-      ...updateTripDto,
-    } as Trip);
+    const updatedTrip = Trip.create({
+      id: trip.getId(),
+      tourist: tourist,
+      destination: updateTripDto.destination || trip.getDestination(),
+      description: updateTripDto.description || trip.getDescription(),
+      startDate: updateTripDto.startDate || trip.getStartDate(),
+      endDate: updateTripDto.endDate || trip.getEndDate(),
+      createdAt: trip.getCreatedAt(),
+      updatedAt: new Date(),
+      isCompleted:
+        updateTripDto.isCompleted !== undefined
+          ? updateTripDto.isCompleted
+          : trip.getIsCompleted(),
+    });
+    return await this.tripRepository.save(updatedTrip);
   }
 }

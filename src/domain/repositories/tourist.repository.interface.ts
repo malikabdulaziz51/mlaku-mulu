@@ -4,7 +4,7 @@ export interface ITouristRepository {
   findAll(): Promise<Tourist[]>;
   findById(id: number): Promise<Tourist | null>;
   findByPassportNumber(passportNumber: string): Promise<Tourist | null>;
-  save(tourist: Tourist): Promise<void>;
+  save(tourist: Tourist): Promise<Tourist>;
   delete(id: number): Promise<void>;
 }
 

@@ -24,15 +24,15 @@ export class UserTypeormEntity {
   @Column({ type: 'enum', enum: UserRole, default: UserRole.TOURIST })
   role: UserRole;
 
-  @Column({ default: false })
+  @Column({ default: false, name: 'is_deleted' })
   isDeleted: boolean;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: 'tourist_id' })
   touristId: number;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }

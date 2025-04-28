@@ -7,17 +7,21 @@ import { Tourist } from 'src/domain/entities/tourist.entity';
 
 export class TripTypeormRepository implements ITripRepository {
   constructor(
-    @InjectRepository(TripTypeormRepository)
+    @InjectRepository(TripTypeormEntity)
     private readonly tripRepository: Repository<TripTypeormEntity>,
   ) {}
   async findAll(): Promise<Trip[]> {
-    const tripEntities = await this.tripRepository.find();
+    const tripEntities = await this.tripRepository
+      .createQueryBuilder('trips')
+      .leftJoinAndSelect('trips.tourist', 'tourists')
+      .where('trips.isDeleted = false')
+      .getMany();
     return tripEntities.map((tripEntity) => this.toDomainEntity(tripEntity));
   }
   async findById(id: number): Promise<Trip | null> {
     const trip = await this.tripRepository
       .createQueryBuilder('trip')
-      .leftJoinAndSelect('trip.tourist', 'tourist')
+      .leftJoinAndSelect('trip.tourist', 'tourists')
       .where('trip.id = :id', { id })
       .andWhere('trip.isDeleted = false')
       .getOne();
@@ -30,7 +34,7 @@ export class TripTypeormRepository implements ITripRepository {
   async findByTouristId(touristId: number): Promise<Trip[] | null> {
     const trips = await this.tripRepository
       .createQueryBuilder('trip')
-      .leftJoinAndSelect('trip.tourist', 'tourist')
+      .leftJoinAndSelect('trip.tourist', 'tourists')
       .where('trip.touristId = :touristId', { touristId })
       .andWhere('trip.isDeleted = false')
       .getMany();
@@ -59,12 +63,14 @@ export class TripTypeormRepository implements ITripRepository {
 
   private toDomainEntity(tripTypeormEntity: TripTypeormEntity): Trip {
     return Trip.create({
+      id: tripTypeormEntity.id,
       destination: tripTypeormEntity.destination,
       startDate: tripTypeormEntity.startDate,
       endDate: tripTypeormEntity.endDate,
       description: tripTypeormEntity.description,
       isCompleted: tripTypeormEntity.isCompleted,
       tourist: Tourist.create({
+        id: tripTypeormEntity.tourist.id,
         name: tripTypeormEntity.tourist.name,
         phone: tripTypeormEntity.tourist.phone,
         nationality: tripTypeormEntity.tourist.nationality,

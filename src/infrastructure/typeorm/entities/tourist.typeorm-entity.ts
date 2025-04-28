@@ -1,7 +1,7 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { TripTypeormEntity } from './trip.typeorm-entity';
 
-@Entity('tourist')
+@Entity('tourists')
 export class TouristTypeormEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -12,7 +12,7 @@ export class TouristTypeormEntity {
   @Column({ nullable: true })
   phone: string;
 
-  @Column({ unique: true })
+  @Column({ unique: true, name: 'passport_number' })
   passportNumber: string;
 
   @Column()

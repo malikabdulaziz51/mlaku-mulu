@@ -26,6 +26,7 @@ export class User {
     this._id = props.id || 0;
     this._name = props.name;
     this._email = props.email;
+    this._password = props.password;
     this._role = props.role;
     this._createdAt = props.createdAt;
     this._updatedAt = props.updatedAt;

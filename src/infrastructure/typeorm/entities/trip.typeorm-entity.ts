@@ -12,10 +12,10 @@ export class TripTypeormEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'timestamp', name: 'start_date' })
   startDate: Date;
 
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'timestamp', name: 'end_date' })
   endDate: Date;
 
   @Column()
@@ -24,28 +24,33 @@ export class TripTypeormEntity {
   @Column()
   description: string;
 
-  @Column({ default: false })
+  @Column({ default: false, name: 'is_completed' })
   isCompleted: boolean;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    name: 'created_at',
+  })
   createdAt: Date;
 
   @Column({
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP',
     onUpdate: 'CURRENT_TIMESTAMP',
+    name: 'updated_at',
   })
   updatedAt: Date;
 
-  @Column({ default: false })
+  @Column({ default: false, name: 'is_deleted' })
   isDeleted: boolean;
 
   @ManyToOne(() => TouristTypeormEntity, (tourist) => tourist.trips, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'touristId', referencedColumnName: 'id' })
+  @JoinColumn({ name: 'tourist_id', referencedColumnName: 'id' })
   tourist: TouristTypeormEntity;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: 'tourist_id' })
   touristId: number;
 }
